@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: nep-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: nep_classroom
+    ports:
+      - "3306:3306"
+    volumes:
+      - nep-mysql-data:/var/lib/mysql
+
+  backend:
+    build: ./backend
+    container_name: nep-backend
+    depends_on:
+      - mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/nep_classroom?useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    ports:
+      - "8080:8080"
+    volumes:
+      - nep-uploads:/app/uploads/videos
+    restart: always
+
+volumes:
+  nep-mysql-data:
+  nep-uploads:
