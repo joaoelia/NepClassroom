@@ -7,6 +7,11 @@ import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import Footer from "@/components/footer"
 
+async function fetchUser(email: string) {
+  const res = await fetch(`/api/users/${email}`)
+  if (!res.ok) return null
+  return await res.json()
+}
 export default function DashboardLayout({
   children,
 }: {
@@ -17,17 +22,25 @@ export default function DashboardLayout({
   const router = useRouter()
   const pathname = usePathname()
 
+
   useEffect(() => {
-    const userData = localStorage.getItem("user")
-    if (!userData) {
+    // Exemplo: buscar email do usuário logado de um cookie ou contexto
+    const email = window.sessionStorage.getItem("email")
+    if (!email) {
       router.push("/")
       return
     }
-    setUser(JSON.parse(userData))
+    fetchUser(email).then((userData) => {
+      if (!userData) {
+        router.push("/")
+        return
+      }
+      setUser(userData)
+    })
   }, [router])
 
   const handleLogout = () => {
-    localStorage.removeItem("user")
+    window.sessionStorage.removeItem("email")
     router.push("/")
   }
 

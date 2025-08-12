@@ -93,10 +93,13 @@ export default function AvaliacoesPage() {
   ])
 
   useEffect(() => {
-    const userData = localStorage.getItem("user")
-    if (userData) {
-      setUser(JSON.parse(userData))
-    }
+    const email = window.sessionStorage.getItem("email")
+    if (!email) return
+    fetch(`/api/users/${email}`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((userData) => {
+        if (userData) setUser(userData)
+      })
   }, [])
 
   const getEvaluationType = (questions: Question[]) => {

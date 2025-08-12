@@ -18,24 +18,35 @@ export default function PerfilPage() {
   })
 
   useEffect(() => {
-    const userData = localStorage.getItem("user")
-    if (userData) {
-      const parsedUser = JSON.parse(userData)
-      setUser(parsedUser)
-      setFormData({
-        name: parsedUser.name || "",
-        email: parsedUser.email || "",
-        phone: parsedUser.phone || "",
-        bio: parsedUser.bio || "",
+    const email = window.sessionStorage.getItem("email")
+    if (!email) return
+    fetch(`/api/users/${email}`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((userData) => {
+        if (userData) {
+          setUser(userData)
+          setFormData({
+            name: userData.name || "",
+            email: userData.email || "",
+            phone: userData.phone || "",
+            bio: userData.bio || "",
+          })
+        }
       })
-    }
   }, [])
 
-  const handleSave = () => {
-    const updatedUser = { ...user, ...formData }
-    localStorage.setItem("user", JSON.stringify(updatedUser))
-    setUser(updatedUser)
-    setIsEditing(false)
+  const handleSave = async () => {
+    if (!user) return
+    const res = await fetch(`/api/users/${user.email}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...user, ...formData }),
+    })
+    if (res.ok) {
+      const updatedUser = await res.json()
+      setUser(updatedUser)
+      setIsEditing(false)
+    }
   }
 
   if (!user) return null
